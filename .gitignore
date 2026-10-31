@@ -1,0 +1,17 @@
+# data & caches
+data/
+results/segments_cache.mat
+*.zip
+*.pkl
+
+# MATLAB
+*.asv
+*.m~
+slprj/
+
+# LaTeX build
+报告-LaTeX/build/
+*.aux
+*.log
+*.out
+*.synctex.gz
