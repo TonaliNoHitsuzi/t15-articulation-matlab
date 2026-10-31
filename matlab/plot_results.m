@@ -27,16 +27,16 @@ bar(x - w/2, gm, w, 'FaceColor', [0.2 0.5 0.4], 'EdgeColor', 'none');
 bar(x + w/2, gp, w, 'FaceColor', [0.2 0.4 0.8], 'EdgeColor', 'none');
 errorbar(x - w/2, gm, gmlo, gmhi, 'k', 'LineWidth', 0.8, 'CapSize', 4);
 errorbar(x + w/2, gp, gplo, gphi, 'k', 'LineWidth', 0.8, 'CapSize', 4);
-yline(1/6, '--', 'chance manner 1/6', 'Color', [0.5 0.5 0.5], ...
-    'LabelHorizontalAlignment', 'left');
-yline(1/8, ':',  'chance place 1/8',  'Color', [0.5 0.5 0.5], ...
-    'LabelHorizontalAlignment', 'left');
+% chance reference lines: no inline text labels (the values are already in
+% the legend entries) -- avoids text colliding with bars/error bars
+yline(1/6, '--', 'Color', [0.3 0.3 0.3], 'LineWidth', 1.2, 'HandleVisibility', 'off');
+yline(1/8, ':',  'Color', [0.3 0.3 0.3], 'LineWidth', 1.2, 'HandleVisibility', 'off');
 xlim([0.4 numel(gname) + 0.6]);
 ylim([0 0.5]);
 xticks(x); xticklabels(gname); xtickangle(30);
 ylabel('balanced accuracy');
-legend({'manner (chance=0.167)', 'place (chance=0.125)'}, ...
-    'Location', 'northeast');
+legend({'manner (chance=1/6 dashed)', 'place (chance=1/8 dotted)'}, ...
+    'Location', 'northeast', 'Color', [0.97 0.97 0.97], 'EdgeColor', [0.4 0.4 0.4]);
 title('Region-group articulation decodability (95% CI, bootstrap over trials)');
 exportgraphics(f, fullfile(outdir, 'bars_balacc_ci.png'), 'Resolution', 140);
 end
@@ -51,7 +51,7 @@ for i = 1:numel(groups)
         M(i,j) = s.acc;  LO(i,j) = s.lo;  HI(i,j) = s.hi;
     end
 end
-f = figure('Position', [60 60 200 + 70*numel(classes) 80 + 36*numel(groups)], ...
+f = figure('Position', [60 60 340 + 130*numel(classes) 120 + 56*numel(groups)], ...
     'Color', 'w');
 imagesc(M);
 colormap(viridis_like());
@@ -64,13 +64,14 @@ for i = 1:numel(groups)
         v = M(i,j);
         if isnan(v), continue; end
         txt = sprintf('%.2f\n[%.2f,%.2f]', v, LO(i,j), HI(i,j));
-        if v < 0.6
+        if v < 0.5
             tcolor = 'w';
         else
             tcolor = 'k';
         end
         text(j, i, txt, 'HorizontalAlignment', 'center', ...
-            'VerticalAlignment', 'middle', 'FontSize', 7, 'Color', tcolor);
+            'VerticalAlignment', 'middle', 'FontSize', 8, 'Color', tcolor, ...
+            'Interpreter', 'none');
     end
 end
 cb = colorbar;
