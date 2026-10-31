@@ -23,9 +23,13 @@ if ~exist(OUTDIR, 'dir'), mkdir(OUTDIR); end
 
 %% 1. Data
 % Data root resolution (order):
-%   a) <project>/data/hdf5_data_final            (recommended)
-%   b) config/data_root.txt (UTF-8, one line with the absolute path)
-HDF5_ROOT = fullfile(HERE, '..', 'data', 'hdf5_data_final');
+%   a) <project>/data/hdf5_gzip          (gzip copy, MATLAB-native)
+%   b) <project>/data/hdf5_data_final    (original LZF, needs plugin)
+%   c) config/data_root.txt (UTF-8, one line with the absolute path)
+HDF5_ROOT = fullfile(HERE, '..', 'data', 'hdf5_gzip');
+if exist(HDF5_ROOT, 'dir') ~= 7
+    HDF5_ROOT = fullfile(HERE, '..', 'data', 'hdf5_data_final');
+end
 if exist(HDF5_ROOT, 'dir') ~= 7
     cfg = fullfile(HERE, '..', 'config', 'data_root.txt');
     if exist(cfg, 'file') == 2

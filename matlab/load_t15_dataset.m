@@ -47,14 +47,21 @@ for si = 1:numel(sessions)
     for ti = 1:numel(keys)
         gname = ['/' keys{ti}];
         try
-            X   = h5read(fp, [gname '/input_features']);   % Tx512
+            X   = h5read(fp, [gname '/input_features']);   % Tx512 (may arrive transposed)
             seq = h5read(fp, [gname '/seq_class_ids']);    % 1xLmax double
             L   = h5readatt(fp, gname, 'seq_len');
+            nT  = h5readatt(fp, gname, 'n_time_steps');
         catch
             continue;
         end
         seq = double(seq(:)).';
         L = double(L);
+        nT = double(nT);
+        % MATLAB h5read may return the dataspace with dims flipped relative
+        % to the (T x 512) h5py layout: enforce time along dim 1.
+        if size(X, 1) ~= nT && size(X, 2) == nT
+            X = X .';
+        end
         nfrm = size(X, 1);
         if nfrm < opt.MinFrames
             continue;
@@ -78,7 +85,7 @@ for si = 1:numel(sessions)
             manList{end+1} = f{1}; %#ok<AGROW>
             plaList{end+1} = f{2}; %#ok<AGROW>
         end
-        tidList{end+1} = repmat(si * 100000 + ti, 1, numel(keepSym)); %#ok<AGROW>
+        tidList{end+1} = repmat(si * 100000 + ti, numel(keepSym), 1); %#ok<AGROW>
         nkept = nkept + 1;
     end
     meta.n_trials = meta.n_trials + nkept;
@@ -88,8 +95,8 @@ end
 meta.sessions = sessions;
 
 segs   = vertcat(segList{:});
-manner = vertcat(manList{:});
-place  = vertcat(plaList{:});
+manner = manList;        % cellstr（不同类名长度不一，不能 vertcat 成 char 矩阵）
+place  = plaList;
 trialId = vertcat(tidList{:});
 fprintf('[data] done: segments=%d trials=%d\n', size(segs,1), numel(unique(trialId)));
 end
