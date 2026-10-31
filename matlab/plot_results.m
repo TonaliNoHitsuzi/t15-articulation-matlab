@@ -27,15 +27,22 @@ bar(x - w/2, gm, w, 'FaceColor', [0.2 0.5 0.4], 'EdgeColor', 'none');
 bar(x + w/2, gp, w, 'FaceColor', [0.2 0.4 0.8], 'EdgeColor', 'none');
 errorbar(x - w/2, gm, gmlo, gmhi, 'k', 'LineWidth', 0.8, 'CapSize', 4);
 errorbar(x + w/2, gp, gplo, gphi, 'k', 'LineWidth', 0.8, 'CapSize', 4);
-% chance reference lines: no inline text labels (the values are already in
-% the legend entries) -- avoids text colliding with bars/error bars
-yline(1/6, '--', 'Color', [0.3 0.3 0.3], 'LineWidth', 1.2, 'HandleVisibility', 'off');
-yline(1/8, ':',  'Color', [0.3 0.3 0.3], 'LineWidth', 1.2, 'HandleVisibility', 'off');
+% chance reference lines, colour-matched to their bar groups:
+% green dashed = manner chance (1/6), blue dotted = place chance (1/8)
+yline(1/6, '--', 'Color', [0.05 0.40 0.28], 'LineWidth', 1.3, ...
+    'HandleVisibility', 'off');
+yline(1/8, ':',  'Color', [0.05 0.25 0.60], 'LineWidth', 1.5, ...
+    'HandleVisibility', 'off');
+text(numel(gname) + 0.55, 1/6 + 0.006, '1/6', 'Color', [0.05 0.40 0.28], ...
+    'FontSize', 9, 'FontWeight', 'bold', 'HorizontalAlignment', 'right');
+text(numel(gname) + 0.55, 1/8 + 0.006, '1/8', 'Color', [0.05 0.25 0.60], ...
+    'FontSize', 9, 'FontWeight', 'bold', 'HorizontalAlignment', 'right');
 xlim([0.4 numel(gname) + 0.6]);
 ylim([0 0.5]);
 xticks(x); xticklabels(gname); xtickangle(30);
 ylabel('balanced accuracy');
-legend({'manner (chance=1/6 dashed)', 'place (chance=1/8 dotted)'}, ...
+legend({'manner (green dashed = chance 1/6)', ...
+        'place (blue dotted = chance 1/8)'}, ...
     'Location', 'northeast', 'Color', [0.97 0.97 0.97], 'EdgeColor', [0.4 0.4 0.4]);
 title('Region-group articulation decodability (95% CI, bootstrap over trials)');
 exportgraphics(f, fullfile(outdir, 'bars_balacc_ci.png'), 'Resolution', 140);
