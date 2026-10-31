@@ -12,13 +12,13 @@ plot_one_heatmap(res, groups, placeOrder, 'place', ...
     fullfile(outdir, 'heatmap_region_place.png'));
 
 %% Bar chart (8 groups, manner/place bal-acc with CI)
-gname = fieldnames(res)';
-gm = cellfun(@(g) res.(g).manner.balacc, gname);
-gmlo = cellfun(@(g) res.(g).manner.balacc - res.(g).manner.balacc_lo, gname);
-gmhi = cellfun(@(g) res.(g).manner.balacc_hi - res.(g).manner.balacc, gname);
-gp = cellfun(@(g) res.(g).place.balacc, gname);
-gplo = cellfun(@(g) res.(g).place.balacc - res.(g).place.balacc_lo, gname);
-gphi = cellfun(@(g) res.(g).place.balacc_hi - res.(g).place.balacc, gname);
+gm  = arrayfun(@(r) r.manner.balacc, res);
+gmlo = arrayfun(@(r) r.manner.balacc - r.manner.balacc_lo, res);
+gmhi = arrayfun(@(r) r.manner.balacc_hi - r.manner.balacc, res);
+gp  = arrayfun(@(r) r.place.balacc, res);
+gplo = arrayfun(@(r) r.place.balacc - r.place.balacc_lo, res);
+gphi = arrayfun(@(r) r.place.balacc_hi - r.place.balacc, res);
+gname = groups(:)';
 
 f = figure('Position', [50 80 1000 460], 'Color', 'w');
 hold on;
@@ -45,7 +45,7 @@ function plot_one_heatmap(res, groups, classes, fieldname, ttl, path)
 M = nan(numel(groups), numel(classes));
 LO = M;  HI = M;
 for i = 1:numel(groups)
-    pc = res.(groups{i}).(fieldname).per_class;
+    pc = res(i).(fieldname).per_class;
     for j = 1:numel(classes)
         s = pc.(matlab.lang.makeValidName(classes{j}));
         M(i,j) = s.acc;  LO(i,j) = s.lo;  HI(i,j) = s.hi;

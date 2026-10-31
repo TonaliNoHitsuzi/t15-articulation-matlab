@@ -47,14 +47,14 @@ fprintf('[test3] bootstrap_balacc_ci OK\n');
 
 %% 4. plot_results smoke (synthetic res)
 GNAME = {'g1', 'g2'};
-res = struct();
-for g = GNAME
+res = struct('g', GNAME);
+for g = 1:numel(GNAME)
     r = struct('balacc', 0.3, 'balacc_lo', 0.27, 'balacc_hi', 0.33);
     r.per_class = struct('a', struct('acc', 0.3, 'lo', 0.27, 'hi', 0.33), ...
                          'b', struct('acc', 0.31, 'lo', 0.28, 'hi', 0.34));
-    res.(g{1}).manner = r;
+    res(g).manner = r;
     r2 = r; r2.balacc = 0.25; r2.balacc_lo = 0.22; r2.balacc_hi = 0.28;
-    res.(g{1}).place = r2;
+    res(g).place = r2;
 end
 outdir = tempdir;
 plot_results(res, GNAME, {'a', 'b'}, {'a', 'b'}, outdir);

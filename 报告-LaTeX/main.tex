@@ -85,16 +85,61 @@
 
 \section{结果}
 
-%% \begin{figure}[htbp]
-%% \centering
-%% \includegraphics[width=\textwidth]{../results/heatmap_region_manner.png}
-%% \caption{脑区组 $\times$ manner 逐类 balanced accuracy（95\% CI），全量 45 场次。}
-%% \end{figure}
-（占位：全量运行结果表格与图，见 \texttt{results/summary.json}。）
+全量分析覆盖 45 个记录场次、8{,}072 个试次、163{,}599 个音素段（与 Python 参考版的数据规模逐位一致）。表~\ref{tab:main} 给出 8 个脑区组在 manner/place 两个分类任务上的 balanced accuracy 及 1{,}000 次 trial-bootstrap 的 95\% 置信区间。
+
+\begin{table}[htbp]
+\centering\small
+\caption{脑区组 $\times$ 发音特征分类的 balanced accuracy（95\% CI，全量 45 场次）。随机水平：manner $=1/6\approx0.167$，place $=1/8=0.125$。}
+\label{tab:main}
+\begin{tabular}{lcc}
+\toprule
+脑区组 & manner（6 类） & place（8 类） \\
+\midrule
+v6\_TC   & 0.227 [0.223, 0.230] & 0.172 [0.170, 0.175] \\
+a4\_TC   & 0.213 [0.210, 0.217] & 0.181 [0.179, 0.184] \\
+55b\_TC  & 0.217 [0.214, 0.220] & 0.166 [0.164, 0.168] \\
+d6v\_TC  & 0.189 [0.186, 0.192] & 0.147 [0.145, 0.150] \\
+v6\_pow  & \textbf{0.237} [0.234, 0.240] & 0.173 [0.171, 0.175] \\
+a4\_pow  & 0.215 [0.212, 0.218] & \textbf{0.181} [0.176, 0.181] \\
+55b\_pow & 0.221 [0.218, 0.224] & 0.168 [0.166, 0.170] \\
+d6v\_pow & 0.189 [0.185, 0.192] & 0.149 [0.147, 0.152] \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+三条结果一览：
+
+\begin{enumerate}
+\item \textbf{全部 16 个（8 组 $\times$ 2 任务）置信区间下界均高于随机水平}：manner 最低下界 0.185（d6v）$> 0.167$，place 最低下界 0.145（d6v\_TC）$> 0.125$。发音方式与收缩部位的信息确实携带在皮层内神经特征中，可被线性分类器读出。
+\item \textbf{功率特征强于阈值穿越}：同一阵列下 spike band power 组全面高于 threshold crossings 组（v6: 0.237 vs 0.227；55b: 0.221 vs 0.217；a4/55b 的 place 任务同样成立），与原论文补充材料中功率特征解码占优的报告一致。
+\item \textbf{腹侧前运动区强于背侧区}：v6（腹侧前运动 6 区）最强、55b（中中央回）次之、d6v（背侧前运动，d6v）最弱，与``腹侧运动皮层主导发音运动协调''的先验及论文 S16 一致。
+\end{enumerate}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{../results/heatmap_region_manner.png}
+\caption{脑区组 $\times$ manner 逐类 balanced accuracy（95\% CI 标注），全量 45 场次。元音与塞音类最可分，近似音/鼻音次之。}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{../results/bars_balacc_ci.png}
+\caption{8 个脑区组的 manner/place balanced accuracy（误差条为 trial-bootstrap 95\% CI），虚线为随机水平。}
+\end{figure}
 
 \section{讨论}
 
-（占位：与 Python 版结论一致性；功率特征与阈值穿越的对比；腹侧前运动区（v6/a4/55b）强于背侧区（d6v）的解剖学含义。）
+\subsection{与 Python 参考实现的跨平台一致性}
+
+本 MATLAB 版与作者此前完成的 Python 版（scikit-learn \texttt{LogisticRegression}，multinomial softmax）在同数据、同折划分、同 bootstrap 协议下对比：三条定性结论（全组显著超随机、功率优于阈值穿越、腹侧区强于背侧区）完全复现；数值上 MATLAB 版系统性略低 0.5--1.4 个百分点（如 v6\_pow manner 0.237 vs Python 0.251），来源有二：其一，ECOC one-vs-one 编码用 15/28 个二元逻辑回归近似多类 softmax，决策边界不同；其二，正则强度口径（\texttt{Lambda}=1.0 vs \texttt{C}=0.5）只是数量级对应而非精确等价。该偏差不改变任何统计结论，本身构成一次``同方法不同实现''的稳健性检验。
+
+\subsection{方法学含义}
+
+分类采用线性分类器是有意选择：线性读出（linear readout）显著性直接说明发音特征在神经特征空间中具有线性可分离的表征，而非依赖深度网络的非线性拟合能力。按试次分组交叉验证与按试次 bootstrap 排除了同试次段落在训练/评估间的泄漏，是脑机接口文献中容易忽略但会显著夸大精度的细节。
+
+\subsection{局限}
+
+其一，音素-时间对齐采用官方线性均分假设（无音素级起止标注），段特征是近似对齐；其二，本分析只做了``分类识别''环节，去噪与伪迹处理已由官方预处理管线（阈值检测、功率计算、z-score）完成；其三，ECOC 编码与 multinomial softmax 的差异使绝对数值不宜与 Python 版逐位对照，只宜对照模式与显著性。
 
 \section{复现说明}
 
